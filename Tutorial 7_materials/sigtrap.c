@@ -1,30 +1,3 @@
-/* 
-  OS Exercises - project 2
-
-  sigtrap - report system signals applied to process
-  
-  usage:
-  
-    sigtrap [n]
-      
-    [n] is time for process to exist - default 20 seconds 
-    
-  program ticks away reporting process id and tick count every
-  second. the program traps and reports the following signals:
-
-    SIGINT, SIGQUIT, SIGHUP, SIGTERM, SIGABRT, SIGCONT, SIGTSTP
-        
-  program can not trap SIGSTOP or SIGKILL
-    
-  to help identify specific processes, the program uses the process
-  id to select one of 32 colour combinations for the display to an
-  ASCC terminal.
-    
-  output is to stdout (set in #define), reset to BLACK and NORMAL
-  and flushed after every printf.
-      
- ****************************************************************
- *******************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -88,7 +61,6 @@ char * colours [] = { BLACK ON_WHITE, CYAN ON_RED, GREEN ON_MAGENTA,
 
 char * colour;                        // choice of colour for this process
 
-
 static int signal_SIGINT = FALSE;     // flags set by signal handler
 static int signal_SIGQUIT = FALSE;    // (all response done in main process   
 static int signal_SIGHUP = FALSE;     //  rather than in interrupt routine)
@@ -96,8 +68,6 @@ static int signal_SIGTERM = FALSE;
 static int signal_SIGABRT = FALSE;
 static int signal_SIGCONT = FALSE;
 static int signal_SIGTSTP = FALSE;
-
-/*******************************************************************/
 
 int main(int argc, char *argv[])
 {
@@ -109,22 +79,20 @@ int main(int argc, char *argv[])
     sigset_t mask;
     
     colour = colours[pid % N_COLOUR]; // select colour for this process
-	
+    
     if (argc > 2 || (argc == 2 && !isdigit((int)argv[1][0])))
         PrintUsage(argv[0]);	
-	
+    
     fprintf(stdout,"%s%7d; START" BLACK NORMAL "\n", colour, (int) pid);
     fflush(stdout);	
-		
+        
     signal (SIGINT, SignalHandler);   // hook up signal handler
     signal (SIGQUIT, SignalHandler);
     signal (SIGHUP, SignalHandler);	
     signal (SIGTERM, SignalHandler);
     signal (SIGABRT, SignalHandler);
-//  signal (SIGCONT, SignalHandler);  // do this intrinsically after return from SIGTSTP
-                                      // due to Darwin/BSD inconsistent SIGCONT behaviour
     signal (SIGTSTP, SignalHandler);
-                                        	
+                                            
     rc = setpriority(PRIO_PROCESS, 0, 20); // be nice, lower priority by 20 	
     cycle = argc < 2 ? DEFAULT_TIME : atoi(argv[1]);  // get tick count 
     if (cycle <= 0) cycle = 1;
@@ -183,20 +151,6 @@ int main(int argc, char *argv[])
     exit(0);
 }
 
-/******************************************************************
- 
-  static void SignalHandler(int sig)
-  
-  trap and report the following signals:
- 
-    SIGINT, SIGQUIT, SIGHUP, SIGTERM, SIGABRT, SIGCONT, SIGTSTP
-        
-  program can not trap SIGSTOP or SIGKILL .
- 
-  Note minimal time in signal handler
-
- *******************************************************************/
-  
 static void SignalHandler(int sig)        // trap signals from shell/system 
 {	
     switch (sig) {
@@ -212,7 +166,7 @@ static void SignalHandler(int sig)        // trap signals from shell/system
         case SIGCONT:
             signal_SIGCONT = TRUE;
             break;
-	case SIGTSTP:
+        case SIGTSTP:
             signal_SIGTSTP = TRUE;
             break;
         case SIGABRT:
@@ -224,16 +178,6 @@ static void SignalHandler(int sig)        // trap signals from shell/system
     }
 }
 
-/*******************************************************************
-   
-  void PrintUsage(char * pgmName)
-  
-  print program usage
-  
-  pgmName - program name
-            if NULL defaults to DEFAULT_NAME      
- *******************************************************************/
- 
 void PrintUsage(char * pgmName)
 {
     char * actualName;
@@ -252,19 +196,6 @@ void PrintUsage(char * pgmName)
            actualName, actualName );
     exit(127);
 }
-
-/*******************************************************************
-
-char * StripPath(char * pathname);
-
-strip path from file name
-
-pathname - file name, with or without leading path
-
-returns pointer to file name part of pathname
-if NULL or pathname is a directory ending in a '/'
-returns NULL
-*******************************************************************/
 
 char * StripPath(char * pathname)
 {
